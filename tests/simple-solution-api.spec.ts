@@ -31,3 +31,40 @@ test('post order with correct data should receive code 201', async ({ request })
   console.log('response body:', await response.json())
   expect(response.status()).toBe(StatusCodes.OK)
 })
+
+test('get order with orderId 0 data should receive code 400', async ({ request }) => {
+  const response = await request.get('https://backend.tallinn-learning.ee/test-orders/0', {})
+  console.log('response status:', response.status())
+  console.log('response body:', await response.json())
+  expect(response.status()).toBe(StatusCodes.BAD_REQUEST)
+})
+
+test('get order with orderId 11 data should receive code 400', async ({ request }) => {
+  const response = await request.get('https://backend.tallinn-learning.ee/test-orders/11', {})
+  console.log('response status:', response.status())
+  console.log('response body:', await response.json())
+  expect(response.status()).toBe(StatusCodes.BAD_REQUEST)
+})
+
+test('get order with empty orderId data should receive code 400', async ({ request }) => {
+  const response = await request.get('https://backend.tallinn-learning.ee/test-orders/', {})
+  console.log('response status:', response.status())
+  console.log('response body:', await response.json())
+  expect(response.status()).toBe(StatusCodes.INTERNAL_SERVER_ERROR)
+})
+
+test('get order with string orderId data should receive code 400', async ({ request }) => {
+  const response = await request.get('https://backend.tallinn-learning.ee/test-orders/test', {})
+  console.log('response status:', response.status())
+  console.log('response body:', await response.json())
+  expect(response.status()).toBe(StatusCodes.BAD_REQUEST)
+})
+
+test('post order with incorrect data type should receive code 415', async ({ request }) => {
+  const response = await request.post('https://backend.tallinn-learning.ee/test-orders', {
+    data: 'string',
+  })
+  console.log('response status:', response.status())
+  console.log('response body:', await response.json())
+  expect(response.status()).toBe(StatusCodes.UNSUPPORTED_MEDIA_TYPE)
+})
