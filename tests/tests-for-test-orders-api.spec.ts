@@ -2,6 +2,8 @@ import { expect, test } from '@playwright/test'
 
 import { StatusCodes } from 'http-status-codes'
 
+import { OrderDto } from './dto/order-dto'
+
 test('successful get request with valid credentials should receive 200', async ({ request }) => {
   const response = await request.get(
     'https://backend.tallinn-learning.ee/test-orders?username=test&password=test',
@@ -53,14 +55,7 @@ test('invalid delete request without api_key should receive 400', async ({ reque
 })
 
 test('successful put request with valid data should receive 200', async ({ request }) => {
-  const requestBody = {
-    status: 'OPEN',
-    courierId: '0',
-    customerName: 'string',
-    customerPhone: 'string',
-    comment: 'string',
-    id: '0',
-  }
+  const requestBody = OrderDto.createNewRandomOrderObject()
   const requestHeader = {
     api_key: '1234567890123456',
   }
@@ -82,14 +77,7 @@ test('invalid put request without data should receive 400', async ({ request }) 
 })
 
 test('invalid put request without api_key in header should receive 400', async ({ request }) => {
-  const requestBody = {
-    status: 'OPEN',
-    courierId: '0',
-    customerName: 'string',
-    customerPhone: 'string',
-    comment: 'string',
-    id: '0',
-  }
+  const requestBody = OrderDto.createNewRandomOrderObject()
   const response = await request.put('https://backend.tallinn-learning.ee/test-orders/1', {
     data: requestBody,
   })
