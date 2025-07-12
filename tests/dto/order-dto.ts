@@ -32,4 +32,15 @@ export class OrderDto {
       Math.floor(Math.random() * 100),
     )
   }
+
+  static createOrderWithoutId(): OrderDto {
+    return new OrderDto(
+      'OPEN',
+      Math.floor(Math.random() * 100),
+      'John Doe',
+      '+123456789',
+      'Urgent order',
+      undefined,
+    )
+  }
 }
