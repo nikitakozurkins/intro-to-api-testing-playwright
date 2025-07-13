@@ -4,7 +4,7 @@ export class OrderDto {
   customerName: string
   customerPhone: string
   comment: string
-  id: number
+  id: number | null
 
   private constructor(
     status: string,
@@ -12,7 +12,7 @@ export class OrderDto {
     customerName: string,
     customerPhone: string,
     comment: string,
-    id: number,
+    id: number | null,
   ) {
     this.status = status
     this.courierId = courierId
@@ -40,7 +40,7 @@ export class OrderDto {
       'John Doe',
       '+123456789',
       'Urgent order',
-      undefined,
+      null,
     )
   }
 }
