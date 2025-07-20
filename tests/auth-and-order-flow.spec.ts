@@ -6,6 +6,8 @@ import { OrderDto } from './dto/order-dto'
 const serviceURL = 'https://backend.tallinn-learning.ee/'
 const loginPath = 'login/student'
 const orderPath = 'orders'
+const deletePath = 'orders/'
+const searchPath = 'orders/'
 
 const jwtPattern = /^eyJhb[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$/
 
@@ -62,5 +64,74 @@ test.describe('Tallinn delivery API tests', () => {
       data: requestBody,
     })
     expect(response.status()).toBe(StatusCodes.METHOD_NOT_ALLOWED)
+  })
+
+  test('login, create order, search created order by id, compare sent and received', async ({
+    request,
+  }) => {
+    const requestBody = LoginDto.createCorrectLoginData()
+    const loginResponse = await request.post(`${serviceURL}${loginPath}`, {
+      data: requestBody,
+    })
+    const jwt = await loginResponse.text()
+    const orderResponse = await request.post(`${serviceURL}${orderPath}`, {
+      data: OrderDto.createNewRandomOrderObject(),
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+      },
+    })
+    const orderResponseBody = await orderResponse.json()
+    const orderId = orderResponseBody.id
+    const searchResponse = await request.get(`${serviceURL}${searchPath}${orderId}`, {
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+      },
+    })
+    const searchResponseBody = await searchResponse.json()
+    expect.soft(loginResponse.status()).toBe(StatusCodes.OK)
+    expect.soft(orderResponse.status()).toBe(StatusCodes.OK)
+    expect.soft(searchResponse.status()).toBe(StatusCodes.OK)
+    expect.soft(orderResponseBody.id).toBe(searchResponseBody.id)
+    expect.soft(orderResponseBody.status).toBe(searchResponseBody.status)
+    expect.soft(orderResponseBody.comment).toBe(searchResponseBody.comment)
+    expect.soft(orderResponseBody.courierId).toBe(searchResponseBody.courierId)
+    expect.soft(orderResponseBody.customerName).toBe(searchResponseBody.customerName)
+    expect.soft(orderResponseBody.customerPhone).toBe(searchResponseBody.customerPhone)
+  })
+
+  test('login, create order, delete created order by id, search deleted order to verify deletion', async ({
+    request,
+  }) => {
+    const requestBody = LoginDto.createCorrectLoginData()
+    const loginResponse = await request.post(`${serviceURL}${loginPath}`, {
+      data: requestBody,
+    })
+    const jwt = await loginResponse.text()
+    const orderResponse = await request.post(`${serviceURL}${orderPath}`, {
+      data: OrderDto.createNewRandomOrderObject(),
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+      },
+    })
+    const orderResponseBody = await orderResponse.json()
+    const orderId = orderResponseBody.id
+    const deleteResponse = await request.delete(`${serviceURL}${deletePath}${orderId}`, {
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+      },
+    })
+    const deleteResponseBody = await deleteResponse.json()
+    const searchResponse = await request.get(`${serviceURL}${searchPath}${orderId}`, {
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+      },
+    })
+    const searchResponseBodyText = await searchResponse.text()
+    expect.soft(loginResponse.status()).toBe(StatusCodes.OK)
+    expect.soft(orderResponse.status()).toBe(StatusCodes.OK)
+    expect.soft(deleteResponse.status()).toBe(StatusCodes.OK)
+    expect.soft(deleteResponseBody).toBeTruthy()
+    expect.soft(searchResponse.status()).toBe(StatusCodes.OK)
+    expect.soft(searchResponseBodyText).toBe('')
   })
 })
