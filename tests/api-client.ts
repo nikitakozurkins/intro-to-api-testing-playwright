@@ -61,7 +61,7 @@ export class ApiClient {
     return responseBody.id
   }
 
-  async delectOrder(orderId: number): Promise<APIResponse> {
+  async delectOrder(orderId: number | string): Promise<APIResponse> {
     console.log('Deleteing order...')
     const response = await this.request.delete(`${serviceURL}${deletePath}${orderId}`, {
       headers: {
