@@ -1,13 +1,13 @@
 import { APIRequestContext, APIResponse } from 'playwright'
 import { LoginDto } from './dto/login-dto'
 import { StatusCodes } from 'http-status-codes'
-import { expect } from '@playwright/test'
 import { OrderDto } from './dto/order-dto'
 
 const serviceURL = 'https://backend.tallinn-learning.ee/'
 const loginPath = 'login/student'
 const orderPath = 'orders'
 const deletePath = 'orders/'
+const searchPath = 'orders/'
 
 export class ApiClient {
   static instance: ApiClient
@@ -41,9 +41,10 @@ export class ApiClient {
     this.jwt = await authResponse.text()
     console.log('jwt received:')
     console.log(this.jwt)
+    console.log('')
   }
 
-  async createOrderAndReturnOrderId(): Promise<number> {
+  async createOrder(): Promise<APIResponse> {
     console.log('Creating order...')
     const response = await this.request.post(`${serviceURL}${orderPath}`, {
       data: OrderDto.createNewRandomOrderObject(),
@@ -51,28 +52,32 @@ export class ApiClient {
         Authorization: `Bearer ${this.jwt}`,
       },
     })
-    console.log('Order response: ', response)
-
-    expect(response.status()).toBe(StatusCodes.OK)
-    const responseBody = await response.json()
-    console.log('Order created: ')
-    console.log(responseBody)
-
-    return responseBody.id
+    console.log('Creating finished')
+    console.log('')
+    return response
   }
 
   async delectOrder(orderId: number | string): Promise<APIResponse> {
-    console.log('Deleteing order...')
+    console.log('Deleting order...')
     const response = await this.request.delete(`${serviceURL}${deletePath}${orderId}`, {
       headers: {
         Authorization: `Bearer ${this.jwt}`,
       },
     })
-    console.log('Delete response: ', response)
+    console.log('Deleting finished')
+    console.log('')
+    return response
+  }
 
-    const responseBody = await response.json()
-    console.log(`Order deleted: ${responseBody}`)
-
+  async searchOrder(orderId: number): Promise<APIResponse> {
+    console.log('Searching order...')
+    const response = await this.request.get(`${serviceURL}${searchPath}${orderId}`, {
+      headers: {
+        Authorization: `Bearer ${this.jwt}`,
+      },
+    })
+    console.log('Searching finished')
+    console.log('')
     return response
   }
 }
